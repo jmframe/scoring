@@ -27,3 +27,26 @@ print("true_binary_outcomes", true_binary_outcomes)
 print("predicted_probabilities", predicted_probabilities)
 print("Brier Score:", brier_score)
 
+import numpy as np
+
+def quantile_score(observations, forecasts, quantile):
+    """
+    Calculate the quantile score for a set of observations and quantile forecasts.
+
+    :param observations: array-like, true observed values.
+    :param forecasts: array-like, forecasted quantile values.
+    :param quantile: float, the quantile for which the forecast is made (e.g., 0.5 for median).
+    :return: float, the quantile score.
+    """
+    errors = observations - forecasts
+    return np.mean((quantile - (errors < 0)) * errors)
+
+# Example usage
+observations = np.array([2.3, 3.5, 4.6, 2.8])
+forecasts = np.array([2.5, 3.7, 4.2, 3.0])
+quantile = 0.5  # Median
+
+score = quantile_score(observations, forecasts, quantile)
+print("observations", observations)
+print("forecasts", forecasts)
+print("Quantile Score:", score)
