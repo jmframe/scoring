@@ -1,33 +1,31 @@
+from scipy.stats import skewnorm
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import brier_score_loss
+import numpy as np
 
-# True values
-y_true = [3, -0.5, 2, 7]
+# Parameters for noise
+std_dev = 0.5  # Standard deviation of noise
+skewness = 0.3  # Skewness of noise (0 for symmetric distribution)
 
-# Predicted values
-y_pred = [2.5, 0.0, 2, 8]
+# Generate observations
+n = 1000
+obs_bounds = [0, 1]
+observations = np.array([obs_bounds[0] + np.random.random() * obs_bounds[1] for i in range(n)])
+# Generate forecasts with normally distributed noise
+forecasts = np.array([obs + skewnorm.rvs(a=skewness, loc=0, scale=std_dev) for obs in observations])
+# Generating true binary outcomes (0 or 1)
+true_binary_outcomes = np.random.randint(0, 2, size=n)
+# Generating predicted probabilities with noise
+predicted_probabilities = np.clip([skewnorm.rvs(a=skewness, loc=true_binary_outcomes[i], scale=std_dev) for i in range(n)], 0, 1)
 
 # Calculate MSE
-mse = mean_squared_error(y_true, y_pred)
-print("y_true", y_true)
-print("y_pred", y_pred)
+mse = mean_squared_error(observations, forecasts)
 print("Mean Squared Error:", mse)
-
-from sklearn.metrics import brier_score_loss
-
-# True binary outcomes (0 or 1)
-true_binary_outcomes = [1, 0, 1, 1]
-
-# Predicted probabilities of the positive class (1)
-predicted_probabilities = [0.9, 0.4, 0.7, 0.8]
 
 # Calculate Brier Score
 brier_score = brier_score_loss(true_binary_outcomes, predicted_probabilities)
 
-print("true_binary_outcomes", true_binary_outcomes)
-print("predicted_probabilities", predicted_probabilities)
 print("Brier Score:", brier_score)
-
-import numpy as np
 
 def quantile_score(observations, forecasts, quantile):
     """
@@ -41,14 +39,8 @@ def quantile_score(observations, forecasts, quantile):
     errors = observations - forecasts
     return np.mean((quantile - (errors < 0)) * errors)
 
-# Example usage
-n = 100
-obs_bounds = [1, 5]
-observations = np.array([obs_bounds[0]+np.random.random()*obs_bounds[1] for i in range(n)])
-forecasts = np.array([observations[i]*np.random.random() for i in range(n)])
-quantile = 0.5  # Median
+quantile = 0.5  # Median quantile
 
 score = quantile_score(observations, forecasts, quantile)
-print("observations", observations)
-print("forecasts", forecasts)
+
 print("Quantile Score:", score)
