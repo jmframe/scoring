@@ -42,8 +42,10 @@ def quantile_score(observations, forecasts, quantile):
     return np.mean((quantile - (errors < 0)) * errors)
 
 # Example usage
-observations = np.array([2.3, 3.5, 4.6, 2.8])
-forecasts = np.array([2.5, 3.7, 4.2, 3.0])
+n = 100
+obs_bounds = [1, 5]
+observations = np.array([obs_bounds[0]+np.random.random()*obs_bounds[1] for i in range(n)])
+forecasts = np.array([observations[i]*np.random.random() for i in range(n)])
 quantile = 0.5  # Median
 
 score = quantile_score(observations, forecasts, quantile)
